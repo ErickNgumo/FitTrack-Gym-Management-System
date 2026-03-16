@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>FitTrack – Attendance Log</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&family=Barlow+Condensed:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --green:#22c55e; --green-bg:rgba(34,197,94,.1); --amber:#f59e0b; --amber-bg:rgba(245,158,11,.1); --red:#ef4444; --red-bg:rgba(239,68,68,.1); --blue:#3b82f6; --blue-bg:rgba(59,130,246,.1); --dark:#0d1117; --dark2:#161b22; --dark3:#21262d; --border:rgba(255,255,255,.08); --text:#e6edf3; --muted:#7d8590; }
+  html,body { height:100%; font-family:'Barlow',sans-serif; background:var(--dark); color:var(--text); min-width:1280px; }
+  .layout { display:grid; grid-template-columns:220px 1fr; min-height:100vh; }
+
+  .sidebar { background:var(--dark2); border-right:1px solid var(--border); display:flex; flex-direction:column; }
+  .sidebar-logo { padding:20px 20px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; }
+  .logo-icon { width:36px; height:36px; background:var(--green); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:18px; }
+  .logo-text { font-family:'Barlow Condensed',sans-serif; font-size:22px; font-weight:800; color:white; }
+  .logo-text span { color:var(--green); }
+  .nav { padding:16px 10px; flex:1; }
+  .nav-section-label { font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:1.5px; padding:8px 10px 4px; }
+  .nav-item { display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:7px; font-size:14px; font-weight:500; color:var(--muted); cursor:pointer; margin-bottom:2px; }
+  .nav-item.active { background:var(--green-bg); color:var(--green); font-weight:600; }
+  .nav-icon { width:18px; text-align:center; font-size:15px; }
+  .sidebar-footer { padding:16px; border-top:1px solid var(--border); }
+  .user-pill { display:flex; align-items:center; gap:10px; }
+  .avatar { width:32px; height:32px; border-radius:50%; background:var(--green); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; color:#0d1117; }
+  .user-name { font-size:13px; font-weight:600; }
+  .user-role { font-size:11px; color:var(--muted); }
+
+  .main { overflow:auto; }
+  .topbar { background:var(--dark2); border-bottom:1px solid var(--border); padding:0 28px; height:58px; display:flex; align-items:center; justify-content:space-between; }
+  .page-title { font-family:'Barlow Condensed',sans-serif; font-size:24px; font-weight:800; color:white; }
+  .topbar-right { display:flex; align-items:center; gap:10px; }
+  .btn { display:inline-flex; align-items:center; gap:6px; padding:8px 16px; border-radius:7px; font-size:13px; font-weight:600; font-family:'Barlow',sans-serif; cursor:pointer; border:none; }
+  .btn-ghost { background:var(--dark3); color:var(--muted); border:1px solid var(--border); }
+  .btn-primary { background:var(--green); color:#0d1117; }
+  .content { padding:28px; }
+
+  /* TOP STATS */
+  .metrics { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px; }
+  .mcard { background:var(--dark2); border:1px solid var(--border); border-radius:10px; padding:16px 20px; }
+  .mcard-label { font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.8px; margin-bottom:6px; }
+  .mcard-val { font-family:'Barlow Condensed',sans-serif; font-size:32px; font-weight:800; }
+  .mcard-val.g { color:var(--green); }
+  .mcard-val.b { color:var(--blue); }
+  .mcard-val.a { color:var(--amber); }
+  .mcard-val.r { color:var(--red); }
+  .mcard-sub { font-size:12px; color:var(--muted); margin-top:3px; }
+
+  /* CHECK-IN PANEL */
+  .twin { display:grid; grid-template-columns:340px 1fr; gap:20px; }
+  .card { background:var(--dark2); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+  .card-header { padding:16px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+  .card-title { font-size:14px; font-weight:700; }
+  .card-sub { font-size:12px; color:var(--muted); margin-top:2px; }
+
+  /* QUICK CHECK-IN */
+  .checkin-body { padding:20px; }
+  .search-wrap { position:relative; margin-bottom:16px; }
+  .search-icon { position:absolute; left:12px; top:50%; transform:translateY(-50%); font-size:15px; color:var(--muted); }
+  .search-input { width:100%; background:var(--dark3); border:1px solid var(--border); border-radius:8px; padding:10px 14px 10px 38px; font-size:14px; font-family:'Barlow',sans-serif; color:var(--text); outline:none; }
+  .search-input:focus { border-color:var(--green); }
+
+  .member-result { background:var(--dark3); border:1px solid var(--green); border-radius:10px; padding:14px; margin-bottom:16px; }
+  .member-result-top { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+  .member-ava { width:44px; height:44px; border-radius:50%; background:var(--green); display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:800; color:#0d1117; }
+  .member-name { font-size:15px; font-weight:700; color:var(--text); }
+  .member-id { font-size:12px; color:var(--muted); }
+  .member-badges { display:flex; gap:8px; }
+  .chip { display:inline-block; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; }
+  .chip.active { background:var(--green-bg); color:var(--green); }
+  .chip.monthly { background:var(--blue-bg); color:var(--blue); }
+  .chip.warning { background:var(--amber-bg); color:var(--amber); }
+
+  .member-info-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px; }
+  .mini-info { background:var(--dark2); border-radius:6px; padding:8px 10px; }
+  .mini-info-key { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.8px; margin-bottom:2px; }
+  .mini-info-val { font-size:13px; font-weight:600; color:var(--text); }
+  .mini-info-val.green { color:var(--green); }
+  .mini-info-val.amber { color:var(--amber); }
+
+  .checkin-btn { width:100%; background:var(--green); color:#0d1117; border:none; border-radius:8px; padding:12px; font-size:15px; font-weight:700; font-family:'Barlow',sans-serif; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; }
+
+  .divider { display:flex; align-items:center; gap:8px; margin:14px 0; }
+  .divider hr { flex:1; border:none; border-top:1px solid var(--border); }
+  .divider span { font-size:11px; color:var(--muted); }
+
+  .recent-checkins { }
+  .recent-item { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid rgba(255,255,255,.04); }
+  .recent-item:last-child { border-bottom:none; }
+  .rtime { font-family:'Barlow Condensed',sans-serif; font-size:14px; font-weight:700; color:var(--green); width:52px; }
+  .rname { font-size:13px; font-weight:600; color:var(--text); flex:1; }
+  .rtag { font-size:11px; color:var(--muted); }
+
+  /* ATTENDANCE TABLE */
+  table { width:100%; border-collapse:collapse; }
+  thead th { padding:10px 20px; text-align:left; font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.8px; border-bottom:1px solid var(--border); }
+  tbody tr:hover { background:var(--dark3); }
+  tbody td { padding:11px 20px; font-size:13px; color:var(--text); border-bottom:1px solid rgba(255,255,255,.04); }
+  tbody tr:last-child td { border-bottom:none; }
+  .member-cell { display:flex; align-items:center; gap:10px; }
+  .mini-ava { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; color:#0d1117; }
+  .filter-row { padding:14px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; }
+  .filter-input { background:var(--dark3); border:1px solid var(--border); border-radius:7px; padding:7px 12px; font-size:13px; font-family:'Barlow',sans-serif; color:var(--text); outline:none; }
+  .filter-input:focus { border-color:var(--green); }
+  .filter-select { background:var(--dark3); border:1px solid var(--border); border-radius:7px; padding:7px 12px; font-size:13px; font-family:'Barlow',sans-serif; color:var(--text); outline:none; }
+  .record-count { font-size:12px; color:var(--muted); margin-left:auto; }
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><div class="logo-icon">🏋️</div><div class="logo-text">Fit<span>Track</span></div></div>
+    <nav class="nav">
+      <div class="nav-section-label">Main</div>
+      <div class="nav-item"><span class="nav-icon">📊</span> Dashboard</div>
+      <div class="nav-item"><span class="nav-icon">👥</span> Members</div>
+      <div class="nav-item"><span class="nav-icon">💳</span> Payments</div>
+      <div class="nav-item active"><span class="nav-icon">✅</span> Attendance</div>
+      <div class="nav-section-label" style="margin-top:12px">Management</div>
+      <div class="nav-item"><span class="nav-icon">🏅</span> Trainers</div>
+      <div class="nav-item"><span class="nav-icon">📋</span> Subscriptions</div>
+      <div class="nav-item"><span class="nav-icon">📈</span> Reports</div>
+      <div class="nav-section-label" style="margin-top:12px">System</div>
+      <div class="nav-item"><span class="nav-icon">⚙️</span> Settings</div>
+      <div class="nav-item"><span class="nav-icon">🔓</span> Logout</div>
+    </nav>
+    <div class="sidebar-footer"><div class="user-pill"><div class="avatar">AD</div><div><div class="user-name">Admin User</div><div class="user-role">Administrator</div></div></div></div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="page-title">Attendance Log</div>
+      <div class="topbar-right">
+        <button class="btn btn-ghost">📅 11 Mar 2026</button>
+        <button class="btn btn-ghost">⬇ Export CSV</button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="metrics">
+        <div class="mcard"><div class="mcard-label">Today's Check-ins</div><div class="mcard-val g">34</div><div class="mcard-sub">as of 2:45 PM</div></div>
+        <div class="mcard"><div class="mcard-label">This Week</div><div class="mcard-val b">120</div><div class="mcard-sub">Mon–Wed</div></div>
+        <div class="mcard"><div class="mcard-label">Peak Hour</div><div class="mcard-val a">7–8 AM</div><div class="mcard-sub">avg 18 members</div></div>
+        <div class="mcard"><div class="mcard-label">Absent Today</div><div class="mcard-val r">133</div><div class="mcard-sub">of 167 active</div></div>
+      </div>
+
+      <div class="twin">
+        <!-- QUICK CHECK-IN -->
+        <div class="card">
+          <div class="card-header">
+            <div><div class="card-title">⚡ Quick Check-In</div><div class="card-sub">Search member to log entry</div></div>
+          </div>
+          <div class="checkin-body">
+            <div class="search-wrap">
+              <span class="search-icon">🔍</span>
+              <input class="search-input" type="text" placeholder="Name, ID or phone number..." value="Wanjiku">
+            </div>
+
+            <!-- FOUND MEMBER -->
+            <div class="member-result">
+              <div class="member-result-top">
+                <div class="member-ava">WK</div>
+                <div>
+                  <div class="member-name">Kamau Wanjiku</div>
+                  <div class="member-id">Member #0042 · 0712 345 678</div>
+                </div>
+              </div>
+              <div class="member-badges" style="margin-bottom:12px">
+                <span class="chip active">Active</span>
+                <span class="chip monthly">Quarterly</span>
+                <span class="chip warning">Exp. in 7 days</span>
+              </div>
+              <div class="member-info-row">
+                <div class="mini-info"><div class="mini-info-key">Subscription Expiry</div><div class="mini-info-val amber">18 Mar 2026</div></div>
+                <div class="mini-info"><div class="mini-info-key">Last Visit</div><div class="mini-info-val">Mon 09 Mar</div></div>
+                <div class="mini-info"><div class="mini-info-key">Visits This Month</div><div class="mini-info-val green">12</div></div>
+                <div class="mini-info"><div class="mini-info-key">Assigned Trainer</div><div class="mini-info-val">K. Ruto</div></div>
+              </div>
+              <button class="checkin-btn">✅ Log Check-In Now · 2:45 PM</button>
+            </div>
+
+            <div class="divider"><hr><span>Today's recent check-ins</span><hr></div>
+
+            <div class="recent-checkins">
+              <div class="recent-item"><span class="rtime">2:31</span><span class="rname">Otieno Mwangi</span><span class="rtag">Monthly</span></div>
+              <div class="recent-item"><span class="rtime">2:18</span><span class="rname">Baraka Mutua</span><span class="rtag">Annual</span></div>
+              <div class="recent-item"><span class="rtime">1:55</span><span class="rname">Grace Muthoni</span><span class="rtag">Monthly</span></div>
+              <div class="recent-item"><span class="rtime">1:40</span><span class="rname">Kipkemoi Ouso</span><span class="rtag">Monthly</span></div>
+              <div class="recent-item"><span class="rtime">1:22</span><span class="rname">Peter Njenga</span><span class="rtag">Quarterly</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- FULL TABLE -->
+        <div class="card">
+          <div class="card-header"><span class="card-title">All Check-Ins — Wednesday 11 March 2026</span></div>
+          <div class="filter-row">
+            <input class="filter-input" type="text" placeholder="🔍 Search member...">
+            <select class="filter-select"><option>All Subscriptions</option><option>Monthly</option><option>Quarterly</option><option>Annual</option></select>
+            <span class="record-count">34 records today</span>
+          </div>
+          <table>
+            <thead><tr><th>#</th><th>Member</th><th>Check-In Time</th><th>Subscription</th><th>Trainer</th></tr></thead>
+            <tbody>
+              <tr><td style="color:var(--muted)">34</td><td><div class="member-cell"><div class="mini-ava" style="background:#22c55e">WK</div>Kamau Wanjiku</div></td><td>2:45 PM</td><td><span class="chip monthly" style="background:var(--blue-bg);color:var(--blue)">Quarterly</span></td><td>K. Ruto</td></tr>
+              <tr><td style="color:var(--muted)">33</td><td><div class="member-cell"><div class="mini-ava" style="background:#3b82f6">OM</div>Otieno Mwangi</div></td><td>2:31 PM</td><td><span class="chip active">Monthly</span></td><td>M. Ndung'u</td></tr>
+              <tr><td style="color:var(--muted)">32</td><td><div class="member-cell"><div class="mini-ava" style="background:#a855f7">BM</div>Baraka Mutua</div></td><td>2:18 PM</td><td><span class="chip" style="background:rgba(168,85,247,.1);color:#a855f7">Annual</span></td><td>K. Ruto</td></tr>
+              <tr><td style="color:var(--muted)">31</td><td><div class="member-cell"><div class="mini-ava" style="background:#f59e0b">GM</div>Grace Muthoni</div></td><td>1:55 PM</td><td><span class="chip active">Monthly</span></td><td>J. Wainaina</td></tr>
+              <tr><td style="color:var(--muted)">30</td><td><div class="member-cell"><div class="mini-ava" style="background:#06b6d4">KO</div>Kipkemoi Ouso</div></td><td>1:40 PM</td><td><span class="chip active">Monthly</span></td><td>M. Ndung'u</td></tr>
+              <tr><td style="color:var(--muted)">29</td><td><div class="member-cell"><div class="mini-ava" style="background:#ef4444">PN</div>Peter Njenga</div></td><td>1:22 PM</td><td><span class="chip monthly" style="background:var(--blue-bg);color:var(--blue)">Quarterly</span></td><td>K. Ruto</td></tr>
+              <tr><td style="color:var(--muted)">28</td><td><div class="member-cell"><div class="mini-ava" style="background:#84cc16">SK</div>Salma Kiptoo</div></td><td>12:58 PM</td><td><span class="chip active">Monthly</span></td><td>J. Wainaina</td></tr>
+              <tr><td style="color:var(--muted)">27</td><td><div class="member-cell"><div class="mini-ava" style="background:#f97316">DW</div>Dennis Waweru</div></td><td>12:34 PM</td><td><span class="chip active">Monthly</span></td><td>M. Ndung'u</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>
