@@ -47,6 +47,21 @@ class Member extends Model
         return $this->hasMany(Attendance::class);
     }
 
+    public function credentials()
+    {
+        return $this->hasOne(MemberCredential::class);
+    }
+
+    public function workoutSessions()
+    {
+        return $this->hasMany(WorkoutSession::class);
+    }
+
+    public function trainerNotes()
+    {
+        return $this->hasMany(TrainerMemberNote::class);
+    }
+
     // ── Helpers ────────────────────────────────────────────────
 
     /** Returns the currently active subscription, or null. */

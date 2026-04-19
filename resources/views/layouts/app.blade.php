@@ -336,6 +336,9 @@
     <div class="sidebar-section">Insights</div>
     <a href="{{ route('reports.index') }}"     class="nav-link-ft {{ request()->routeIs('reports.*')       ? 'active' : '' }}"><i class="bi bi-bar-chart-line"></i> Reports</a>
 
+    <div class="sidebar-section">Admin</div>
+    <a href="{{ route('portal.members') }}"   class="nav-link-ft {{ request()->routeIs('portal.*')        ? 'active' : '' }}"><i class="bi bi-shield-lock"></i> Portal Access</a>
+
     <div style="padding: 24px 20px; margin-top: auto; border-top: 1px solid rgba(255,255,255,.08); position: absolute; bottom: 0; width: 100%;">
         <div style="color:rgba(255,255,255,.5); font-size:.78rem; margin-bottom:6px;">{{ auth()->user()->name }}</div>
         <form method="POST" action="{{ route('logout') }}">

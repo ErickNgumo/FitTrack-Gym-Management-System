@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Attendance extends Model
 {
-    protected $table = 'attendance'; // ✅ ADD THIS LINE
+    protected $table = 'attendance'; // Laravel would guess 'attendances' — override it
 
     public $timestamps = false;
 
